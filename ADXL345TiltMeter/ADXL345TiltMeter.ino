@@ -5,7 +5,7 @@
 #include <Math.h>
 
 // Callibration
-// please read your ADXL345 maximum and minimum values for each cordinates and pit it here
+// please read your ADXL345 maximum and minimum values for each cordinates and put it here
 #define MIN_X -253
 #define MAX_X 259
 #define MIN_Y -263
@@ -26,7 +26,6 @@
 Adafruit_SSD1306 display = Adafruit_SSD1306();
 Adafruit_ADXL345_Unified adxl;
 
-
 void setup() {
 
 //  Serial.begin(115200);
@@ -38,7 +37,6 @@ void setup() {
   adxl.begin();
   adxl.setRange(ADXL345_RANGE_4_G);
   adxl.setDataRate(ADXL345_DATARATE_50_HZ);
-
 }
 
 String format(double x) {
@@ -68,7 +66,6 @@ void triangle(int x, int y, bool isReverse) {
     }
     display.drawFastHLine(ox, y+i, s, WHITE);
   }
-
 }
 
 void loop() {
@@ -96,7 +93,7 @@ void loop() {
 //  Serial.print(z);
 //  Serial.print("\n");
 
-  
+
   display.clearDisplay();
 
   display.setTextSize(1);
@@ -139,5 +136,4 @@ void loop() {
 
   display.display();
   delay(100);
-
 }
