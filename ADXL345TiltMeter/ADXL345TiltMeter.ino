@@ -4,7 +4,6 @@
 #include <Adafruit_SSD1306.h>
 #include <Math.h>
 
-
 // Callibration
 // please read your ADXL345 maximum and minimum values for each cordinates and pit it here
 #define MIN_X -253
@@ -24,14 +23,8 @@
 #define slopeZ      0.00394477   
 #define interceptZ  0.10848198
 
-
 Adafruit_SSD1306 display = Adafruit_SSD1306();
-
 Adafruit_ADXL345_Unified adxl;
-
-const int xpin = A0;
-const int ypin = A1;
-
 
 
 void setup() {
@@ -87,8 +80,6 @@ void loop() {
   double rx = x * slopeX + interceptX;
   double ry = y * slopeY + interceptY;
   double rz = z * slopeZ + interceptZ;
-
-
 
   rx = map(rx*10000, -10000, 10000, -9000, 9000);
   rx = rx/100;
@@ -148,6 +139,5 @@ void loop() {
 
   display.display();
   delay(100);
-
 
 }
