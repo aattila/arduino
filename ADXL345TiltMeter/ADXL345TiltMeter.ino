@@ -4,9 +4,9 @@
 #include <Adafruit_SSD1306.h>
 #include <Math.h>
 
-#define G_EARTH 9.8
 
 // Callibration
+// please read your ADXL345 maximum and minimum values for each cordinates and pit it here
 #define MIN_X -253
 #define MAX_X 259
 #define MIN_Y -263
@@ -14,8 +14,9 @@
 #define MIN_Z -281
 #define MAX_Z 226
 
-//  slope = 2 / (max_reading - min_reading)
-//  intercept = 1 - slope * max_reading
+// please calculate the slope and the intercept values after you have the callibration data by using the equations below:
+// slope = 2 / (max_reading - min_reading)
+// intercept = 1 - slope * max_reading
 #define slopeX      0.00390625
 #define interceptX -0.01171875 
 #define slopeY      0.00391389   
