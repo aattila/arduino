@@ -41,12 +41,12 @@ void setup() {
 
 String format(double x) {
   String sx = String(x,2);
-  if(x>0 && x<10) {
-    sx = "0" + sx;
+  if(x>=0 && x<10) {
+    sx = " " + sx;
   }
-  if(x<0) {
-    if(x>-10) {
-      sx = "0" + sx.substring(1);
+  if(x<=0) {
+    if(x>=-10) {
+      sx = " " + sx.substring(1);
     } else {
       sx = sx.substring(1);
     }
@@ -54,14 +54,14 @@ String format(double x) {
   return sx;
 }
 
-void triangle(int x, int y, bool isReverse) {
-  for (int i=0; i < 5; i++){
+void triangle(int x, int y, int h, int w, bool isReverse) {
+  for (int i=0; i < h; i++){
     int s, ox;
     if(isReverse) {
       s = 1+(i*2);
       ox = x-i;
     } else {
-      s = 9-(i*2);
+      s = w-(i*2);
       ox = x+i;
     }
     display.drawFastHLine(ox, y+i, s, WHITE);
@@ -96,13 +96,10 @@ void loop() {
 
   display.clearDisplay();
 
-  display.setTextSize(1);
-  display.setCursor(96, 0);
-  display.print("x");
-  display.setCursor(96, 18);
-  display.print("y");
-  display.drawFastHLine(86, 10, 28, WHITE);
-  display.drawFastHLine(86, 28, 28, WHITE);
+//  display.setCursor(96, 0);
+//  display.print("x");
+//  display.setCursor(96, 18);
+//  display.print("y");
   display.setTextSize(2);
 
   display.setCursor(0, 0);
@@ -110,28 +107,28 @@ void loop() {
   display.setCursor(0, 18);
   display.print(format(ry));
 
+  // drawing X axis assets
+  display.drawFastHLine(72, 15, 56, WHITE);
   if(rx != 0) {
-    int tx1 = 75;
-    int tx2 = tx1 + 40;
     if(rx>0) {
-      tx2 = tx2+5;
+      triangle(72, 18, 4, 7,false);
+      triangle(124, 9, 4, 7, true);  
     } else {
-      tx1 = tx1+5;
+      triangle(75, 9, 4, 7, true);
+      triangle(121, 18, 4, 7, false);  
     }
-    triangle(tx1, 6, rx<0);
-    triangle(tx2, 6, rx>0);  
   }
 
+  // drawing Y axis assets
+  display.drawLine(85, 24, 109, 8, WHITE);
   if(ry != 0) {
-    int tx1 = 75;
-    int tx2 = tx1 + 40;
     if(ry>0) {
-      tx2 = tx2+5;
+      triangle(81, 27, 3, 5,false);
+      triangle(111, 4, 3, 5,true);
     } else {
-      tx1 = tx1+5;
+      triangle(84, 22, 3, 5,true);
+      triangle(108, 8, 3, 5,false);
     }
-    triangle(tx1, 24, ry<0);
-    triangle(tx2, 24, ry>0);  
   }
 
   display.display();
