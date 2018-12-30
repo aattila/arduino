@@ -2,7 +2,6 @@
 #define CLK_PIN 2
 #define  DT_PIN 11
 #define  SW_PIN 3
-#define LED_PIN 12
 
 volatile boolean turnDetected;
 volatile boolean isUp;
