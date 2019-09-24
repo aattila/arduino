@@ -8,25 +8,31 @@
 #define R4 A3
 #define R5 A4
 #define R6 A5
-#define R7 2
-#define R8 3
+#define R7 8 
+#define R8 9 
 
-const byte relays[8] = { A0, A1, A2, A3, A4, A5, 2, 3};
+//10, 11, 12, 13 is for eth shield
+
+#define IR_DOUT1    4
+#define IR_DOUT2    5
+#define IR_DOUT3    6
+#define IR_SYNC     2 //INT0
+
+const byte relays[8] = { R1, R2, R3, R4, R5, R6, R7, R8};
 
 EthernetClient ethClient;
 PubSubClient client;
 
-long previousMillis;
-
-const byte mac[6] = {0xA0,0xA1,0xA2,0xA3,0xA4,0x01};
+const byte mac[6] = {0xA0, 0xA1, 0xA2, 0xA3, 0xA4, 0x01};
 IPAddress ip( 192, 168,   1,  203);
 boolean isEthUp = false;
 
 const char* server = "192.168.1.212";
-const char* token = "
+const char* token = ""; //device token goes here
 const char* device = "Terrace";
 const char* attr_topic = "v1/devices/me/attributes";
 const char* tele_topic = "v1/devices/me/telemetry";
+
 
 void callback(char* topic, byte* payload, unsigned int length) {
   if ((char)payload[2] == 'R') {
@@ -36,40 +42,85 @@ void callback(char* topic, byte* payload, unsigned int length) {
     Serial.print(id);
     Serial.print(F(": "));
     Serial.println(isOn);
-    digitalWrite(relays[id-1], !isOn);    
-  }  
+    digitalWrite(relays[id - 1], !isOn);
+  }
+}
+
+void irEvent() { //ISR
+  //handle inputs as bits
+  bool b1 = digitalRead(IR_DOUT1);
+  bool b2 = digitalRead(IR_DOUT2);
+  bool b3 = digitalRead(IR_DOUT3);
+  bool ID[3] = {b1, b2, b3};
+  int recivedID = ID[0] | (ID[1] << 1) | (ID[2] << 2);
+  switch (recivedID) {
+    case 0:
+      digitalWrite(relays[0], !digitalRead(relays[0]));
+      break;
+    case 1:
+      digitalWrite(relays[1], !digitalRead(relays[1]));
+      break;
+    case 2:
+      digitalWrite(relays[2], !digitalRead(relays[2]));
+      break;
+    case 3:
+      digitalWrite(relays[3], !digitalRead(relays[3]));
+      break;
+    case 4:
+      digitalWrite(relays[4], !digitalRead(relays[4]));
+      break;
+    case 5:
+      for (int i = 0; i < 4; i++) {
+        digitalWrite(relays[i], !digitalRead(relays[i]));
+      }
+      break;
+    case 6:
+      digitalWrite(relays[7], !digitalRead(relays[7]));
+      break;
+    case 7:
+      for (int i = 0; i < 8; i++) {
+        digitalWrite(relays[i], HIGH);
+      }
+      break;
+  }
 }
 
 void setup() {
   // setup serial communication
   Serial.begin(9600);
   delay(1000);
-  
-  for(int i=0; i<8; i++) {
+
+  pinMode(IR_SYNC, INPUT_PULLUP);
+  pinMode(IR_DOUT1, INPUT_PULLUP);
+  pinMode(IR_DOUT2, INPUT_PULLUP);
+  pinMode(IR_DOUT3, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(IR_SYNC), irEvent, CHANGE);
+
+  for (int i = 0; i < 8; i++) {
     pinMode(relays[i], OUTPUT);
-    digitalWrite(relays[i], HIGH);    
+    digitalWrite(relays[i], HIGH);
   }
 
 
   // setup ethernet communication using DHCP
-//  if(Ethernet.begin(mac) == 0) {
-//    Serial.println(F("Ethernet configuration using DHCP failed"));
-//    for(;;);
-//  }
-// Ethernet.begin(mac, ip);
+  //  if(Ethernet.begin(mac) == 0) {
+  //    Serial.println(F("Ethernet configuration using DHCP failed"));
+  //    for(;;);
+  //  }
+  // Ethernet.begin(mac, ip);
 
 
 }
 
 void reconnect() {
-  if(!isEthUp) {
+  if (!isEthUp) {
     Serial.print(F("Get Ethernet link ..."));
-//    isEthUp = Ethernet.begin(mac);
+    //    isEthUp = Ethernet.begin(mac);
 
     Ethernet.begin(mac, ip);
     isEthUp = true;
 
-    if(isEthUp) {
+    if (isEthUp) {
       Serial.println(F("UP"));
       // setup mqtt client
       client.setClient(ethClient);
