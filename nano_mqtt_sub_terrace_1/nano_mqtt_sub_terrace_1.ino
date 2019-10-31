@@ -13,14 +13,12 @@
 
 //10, 11, 12, 13 reserved for thr eth shield
 
-#define IR_SYNC     3  //INT1
 #define IR_DATA     5  //PWM
 
 byte relays[8] = { R1, R2, R3, R4, R5, R6, R7, R8};
 volatile uint16_t data = 0;
-volatile unsigned long last_micros;
 long lastDebounceTime = 0;  // the last time of the ISR event
-long debounceDelay = 2000;  // the debounce time;
+long debounceDelay = 1000;  // the debounce time;
 
 EthernetClient ethClient;
 PubSubClient client;
@@ -49,26 +47,27 @@ void callback(char* topic, byte* payload, unsigned int length) {
 }
 
 
-void irEvent() {
-  if ((long)(micros() - last_micros) >= 2000 * 1000) { // 2 sec debouncing
-    data = pulseIn(IR_DATA, HIGH);
-    Serial.print("ISR: ");
-    Serial.println(data);
-    last_micros = micros();
-  }
-}
-
 void setRelay(byte relay) {
   digitalWrite(relays[relay], !digitalRead(relays[relay]));
+  Serial.println(relay + 1);
 }
 
 void setStar() {
+  bool val = LOW;
   for (int i = 0; i < 4; i++) {
-    digitalWrite(relays[i], LOW);
+    if (digitalRead(relays[i]) == LOW) {
+      val = HIGH;
+      break;
+    }
+  }
+  Serial.println("*");
+  for (int i = 0; i < 4; i++) {
+    digitalWrite(relays[i], val);
   }
 }
 
 void shutDown() {
+  Serial.println("OK");
   for (int i = 0; i < 8; i++) {
     digitalWrite(relays[i], HIGH);
   }
@@ -80,8 +79,6 @@ void setup() {
   delay(1000);
 
   pinMode(IR_DATA, INPUT_PULLUP);
-  pinMode(IR_SYNC, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(IR_SYNC), irEvent, CHANGE);
 
   for (int i = 0; i < 8; i++) {
     pinMode(relays[i], OUTPUT);
@@ -140,44 +137,40 @@ void loop() {
     reconnect();
   }
 
+  data = pulseIn(IR_DATA, HIGH);
   if ( (millis() - lastDebounceTime) > debounceDelay) {
     if (data > 0) {
-      Serial.print("PROC: ");
-      Serial.println(data);
-      if (data > 75 && data < 80 ) { //1
+      if (data > 60 && data < 90 ) { //1
         setRelay(0);
-      } else if (data > 150 && data < 160) { //2
+      } else if (data > 140 && data < 160) { //2
         setRelay(1);
-      } else if (data > 230 && data < 240) { //3
+      } else if (data > 220 && data < 250) { //3
         setRelay(2);
-      } else if (data > 305 && data < 315) { //4
+      } else if (data > 290 && data < 330) { //4
         setRelay(3);
-      } else if (data > 380 && data < 390) { //5
+      } else if (data > 350 && data < 400) { //5
         setRelay(4);
-      } else if (data > 460 && data < 470) { //6
+      } else if (data > 440 && data < 490) { //6
         setRelay(5);
-      } else if (data > 535 && data < 545) { //7
+      } else if (data > 510 && data < 560) { //7
         setRelay(6);
-      } else if (data > 615 && data < 625) { //8
+      } else if (data > 600 && data < 640) { //8
         setRelay(7);
-      } else if (data > 690 && data < 700) { //9
-      } else if (data > 770 && data < 780) { //0
-      } else if (data > 845 && data < 855) { //STAR
+      } else if (data > 670 && data < 720) { //9
+      } else if (data > 750 && data < 800) { //0
+      } else if (data > 820 && data < 870) { //STAR
         setStar();
-      } else if (data > 920 && data < 930) { //SHARP
+      } else if (data > 900 && data < 950) { //SHARP
         setRelay(7);
-      } else if (data > 1001 && data < 1010) { //UP
-      } else if (data > 1080 && data < 1090) { //DOWN
-      } else if (data > 1155 && data < 1165) { //LEFT
-      } else if (data > 1230 && data < 1240) { //RIGHT
-      } else if (data > 1310 && data < 1320) { //OK
+      } else if (data > 990  && data < 1030) { //UP
+      } else if (data > 1060 && data < 1110) { //DOWN
+      } else if (data > 1130 && data < 1180) { //LEFT
+      } else if (data > 1210 && data < 1260) { //RIGHT
+      } else if (data > 1290 && data < 1340) { //OK
         shutDown();
       }
-      data = 0;
     }
     lastDebounceTime = millis();
-  } else {
-    data = 0;
   }
 
   client.loop();
