@@ -1,4 +1,6 @@
 
+#include <credentials.h>
+
 #include <UIPEthernet.h>
 #include "PubSubClient.h"
 
@@ -24,14 +26,7 @@ EthernetClient ethClient;
 PubSubClient client;
 
 const byte mac[6] = {0xA0, 0xA1, 0xA2, 0xA3, 0xA4, 0x01};
-IPAddress ip( 192, 168,   1,  203);
 boolean isEthUp = false;
-
-const char* server = "192.168.1.212";
-const char* token = "SbalRBjDpfhAd3UutoqA"; //device token goes here
-const char* device = "Terrace";
-const char* attr_topic = "v1/devices/me/attributes";
-const char* tele_topic = "v1/devices/me/telemetry";
 
 
 void callback(char* topic, byte* payload, unsigned int length) {
@@ -85,30 +80,23 @@ void setup() {
     digitalWrite(relays[i], HIGH);
   }
 
-
-  // setup ethernet communication using DHCP
-  //  if(Ethernet.begin(mac) == 0) {
-  //    Serial.println(F("Ethernet configuration using DHCP failed"));
-  //    for(;;);
-  //  }
-  // Ethernet.begin(mac, ip);
-
-
 }
 
 void reconnect() {
   if (!isEthUp) {
     Serial.print(F("Get Ethernet link ..."));
-    //    isEthUp = Ethernet.begin(mac);
+    // DHCP
+    isEthUp = Ethernet.begin(mac);
 
-    Ethernet.begin(mac, ip);
-    isEthUp = true;
+    // static
+    //Ethernet.begin(mac, ip);
+    //isEthUp = true;
 
     if (isEthUp) {
       Serial.println(F("UP"));
       // setup mqtt client
       client.setClient(ethClient);
-      client.setServer(server, 1883);
+      client.setServer(MQTT_SERVER, MQTT_PORT);
       client.setCallback(callback);
       Serial.println(F("MQTT client configured"));
       delay(1000);
@@ -120,8 +108,8 @@ void reconnect() {
 
   while (isEthUp and !client.connected()) {
     Serial.print(F("Connecting to ThingsBoard node ..."));
-    if ( client.connect(device, token, NULL) ) {
-      client.subscribe(attr_topic);
+    if ( client.connect(MQTT_DEV_TERRACE, MQTT_DEV_TERRACE_TOKEN, NULL) ) {
+      client.subscribe(MQTT_ATTR_TOPIC);
       Serial.println( F("[DONE]") );
     } else {
       Serial.print( F("[FAILED] [ rc = ") );
