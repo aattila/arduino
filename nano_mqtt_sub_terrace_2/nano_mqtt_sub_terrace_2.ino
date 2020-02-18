@@ -20,7 +20,7 @@ byte relays[8] = { R1, R2, R3, R4, R5, R6, R7, R8};
 volatile uint16_t data = 0;
 volatile unsigned long last_micros;
 long lastDebounceTime = 0;  // the last time of the ISR event
-long debounceDelay = 2000;  // the debounce time;
+long debounceDelay = 1000;  // the debounce time;
 
 EthernetClient ethClient;
 PubSubClient client;
@@ -81,7 +81,7 @@ void setup() {
 
   pinMode(IR_DATA, INPUT_PULLUP);
   pinMode(IR_SYNC, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(IR_SYNC), irEvent, CHANGE);
+  //  attachInterrupt(digitalPinToInterrupt(IR_SYNC), irEvent, CHANGE);
 
   for (int i = 0; i < 8; i++) {
     pinMode(relays[i], OUTPUT);
@@ -136,11 +136,12 @@ void reconnect() {
 }
 
 void loop() {
-  if (!isEthUp or !client.connected() ) {
-    reconnect();
-  }
+  //  if (!isEthUp or !client.connected() ) {
+  //    reconnect();
+  //  }
 
   if ( (millis() - lastDebounceTime) > debounceDelay) {
+    data = pulseIn(IR_DATA, HIGH);
     if (data > 0) {
       Serial.print("PROC: ");
       Serial.println(data);
@@ -180,5 +181,5 @@ void loop() {
     data = 0;
   }
 
-  client.loop();
+  //  client.loop();
 }
